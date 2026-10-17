@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050505" />
+  <title>ACESSE JÁ | Seus links em um só lugar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f5dc83;
+    --black: #050505;
+    --card: #111;
+    --border: #453817;
+    --muted: #b7ad8e;
+    --danger: #ff6464;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Montserrat, Arial, sans-serif;
+    color: #fff;
+    background: radial-gradient(ellipse at top, #211b0b 0%, #090909 38%, #050505 75%);
+  }
+
+  .wrap {
+    width: min(920px, 100%);
+    margin: auto;
+    padding: 28px 18px 24px;
+  }
+
+  .top {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 42px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    border: 1px solid var(--border);
+    background: #111;
+    color: var(--gold-light);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  header {
+    text-align: center;
+    padding: 12px 0 28px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: linear-gradient(145deg, #30260d, #090909);
+    box-shadow: 0 0 35px #d4af3720;
+    color: var(--gold-light);
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 7vw, 54px);
+    line-height: 1.05;
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(120deg, #fff3b2, var(--gold), #a87912);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+
+  .intro {
+    color: #d2c9ab;
+    font-size: 13px;
+    line-height: 1.7;
+    text-align: center;
+    max-width: 580px;
+    margin: 0 auto 26px;
+  }
+
+  .adminbar {
+    display: none;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 0 22px;
+  }
+
+  .adminbar.show { display: flex; }
+
+  .primary, .secondary, .danger {
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .15s, opacity .15s;
+  }
+
+  .primary {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #171205;
+  }
+
+  .secondary {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+  }
+
+  .danger {
+    background: #351515;
+    color: #ffb2b2;
+    border: 1px solid #6e2929;
+  }
+
+  .primary:hover, .secondary:hover, .danger:hover, .pill:hover {
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    opacity: .5;
+    cursor: wait;
+  }
+
+  .directories {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .directory {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(135deg, #15130d, #0d0d0d 65%);
+    overflow: hidden;
+    box-shadow: 0 8px 25px #0005;
+  }
+
+  .dirhead {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 17px 18px;
+    border-bottom: 1px solid #302712;
+  }
+
+  .diricon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #171205;
+    background: linear-gradient(145deg, var(--gold-light), var(--gold));
+    font-size: 19px;
+    flex-shrink: 0;
+  }
+
+  .dirtext { flex: 1; }
+
+  .dirtext h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .dirtext p {
+    margin: 5px 0 0;
+    color: #a79d7d;
+    font-size: 11px;
+  }
+
+  .count {
+    color: var(--gold-light);
+    font-size: 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 8px;
+  }
+
+  .links {
+    padding: 10px;
+    display: grid;
+    gap: 9px;
+  }
+
+  /* Cada link vira uma barra clicável colorida */
+  .linkrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .link-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    padding: 15px 17px;
+    border-radius: 12px;
+    background: var(--link-color, #292929);
+    border: 1px solid #ffffff18;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    transition: transform .2s, filter .2s, box-shadow .2s;
+    box-shadow: 0 4px 12px #0003;
+  }
+
+  .link-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+    box-shadow: 0 7px 18px #0005;
+  }
+
+  .link-button .link-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .link-button .link-label {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .link-button .arrow {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* Cores de referência das plataformas */
+  .link-button.whatsapp { --link-color: #25D366; }
+  .link-button.instagram {
+    --link-color: #C13584;
+    background: linear-gradient(110deg, #833AB4, #E1306C, #FCAF45);
+  }
+  .link-button.facebook { --link-color: #1877F2; }
+  .link-button.website { --link-color: #B38B20; }
+  .link-button.other { --link-color: #424242; }
+
+  /* Ações administrativas permanecem separadas */
+  .linkactions {
+    display: none;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .is-admin .linkactions { display: flex; }
+
+  .mini {
+    border: 1px solid #453817;
+    color: var(--gold-light);
+    background: #15120a;
+    border-radius: 8px;
+    padding: 9px;
+    cursor: pointer;
+  }
+
+  .mini:hover { background: #30260d; }
+
+  .empty {
+    padding: 16px 10px;
+    color: #8e866d;
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .loading {
+    padding: 26px;
+    text-align: center;
+    color: var(--gold-light);
+    font-size: 13px;
+  }
+
+  .status {
+    min-height: 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 10px 0;
+  }
+
+  .status.error { color: var(--danger); }
+
+  footer {
+    text-align: center;
+    color: #70684f;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 30px 0 12px;
+  }
+
+  .modal {
+    width: min(450px, calc(100% - 28px));
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 0;
+    background: #0c0c0c;
+    color: white;
+    box-shadow: 0 25px 80px #000b;
+  }
+
+  .modal::backdrop {
+    background: #000c;
+    backdrop-filter: blur(4px);
+  }
+
+  .modalhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 19px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modalhead h3 {
+    margin: 0;
+    font-size: 17px;
+  }
+
+  .x {
+    border: 0;
+    background: transparent;
+    color: #ddd;
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .modalbody {
+    padding: 20px;
+    display: grid;
+    gap: 13px;
+  }
+
+  .field { display: grid; gap: 7px; }
+
+  .field label {
+    font-size: 11px;
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: #151515;
+    color: #fff;
+    border: 1px solid #40351c;
+    border-radius: 10px;
+    padding: 12px;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--gold);
+  }
+
+  .modalfoot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 0 20px 20px;
+  }
+
+  .hint {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #a89d7d;
+  }
+
+  .hide { display: none !important; }
+
+  @media (min-width: 680px) {
+    .directories { grid-template-columns: 1fr 1fr; }
+    .directory:last-child { grid-column: 1 / -1; }
+    .directory:last-child .links { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 420px) {
+    .wrap { padding: 20px 12px; }
+
+    .link-button {
+      padding: 13px 11px;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .mini { padding: 7px; }
+    .dirhead { padding: 14px 12px; gap: 9px; }
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button></div>
+  <header>
+    <div class="logo"><i class="fa-solid fa-link"></i></div>
+    <h1>ACESSE JÁ</h1><div class="subtitle">NOSSO PORTFÓLIO EM UM SÓ LUGAR</div>
+  </header>
+  <p class="intro">Acesse rapidamente os links e desfrute de todas nossas funcionalidades.</p>
+  <div id="adminBar" class="adminbar"><button id="addBtn" class="primary"><i class="fa-solid fa-plus"></i> Adicionar link</button><button id="refreshBtn" class="secondary"><i class="fa-solid fa-rotate"></i> Atualizar lista</button></div>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+  <main id="directories" class="directories"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando seus links...</div></main>
+  <footer>ORGANIZAÇÃO &nbsp;•&nbsp; PRATICIDADE &nbsp;•&nbsp; ESTILO</footer>
+</div>
+
+<dialog class="modal" id="loginModal">
+  <form id="loginForm">
+    <div class="modalhead"><h3><i class="fa-solid fa-shield-halved" style="color:var(--gold)"></i> Login do administrador</h3><button type="button" class="x" data-close="loginModal" aria-label="Fechar">×</button></div>
+    <div class="modalbody"><p class="hint">Entre com a conta de administrador cadastrada no Supabase.</p><div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" required value="pablofreitas1204@gmail.com"></div><div class="field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><p id="loginError" class="status error"></p></div>
+    <div class="modalfoot"><button type="button" class="secondary" data-close="loginModal">Cancelar</button><button class="primary" id="loginSubmit" type="submit">Entrar</button></div>
+  </form>
+</dialog>
+
+<dialog class="modal" id="linkModal">
+  <form id="linkForm">
+    <div class="modalhead"><h3 id="linkModalTitle">Adicionar link</h3><button type="button" class="x" data-close="linkModal" aria-label="Fechar">×</button></div>
+    <div class="modalbody"><div class="field"><label for="category">Diretório</label><select id="category" required><option>WhatsApp</option><option>Instagram</option><option>Sites Web</option><option>Facebook</option><option>Outros Links</option></select></div><div class="field"><label for="linkName">Nome do link</label><input id="linkName" maxlength="100" placeholder="Ex.: Meu WhatsApp" required></div><div class="field"><label for="linkUrl">Endereço (URL)</label><input id="linkUrl" type="url" maxlength="2000" placeholder="https://..." required></div><p class="hint">Use endereços que comecem com https:// ou http://.</p><p id="linkError" class="status error"></p></div>
+    <div class="modalfoot"><button type="button" class="secondary" data-close="linkModal">Cancelar</button><button class="primary" id="linkSubmit" type="submit">Salvar link</button></div>
+  </form>
+</dialog>
+
+<script>
+  // Configuração pública do projeto Supabase. Nunca coloque service_role/secret key neste arquivo.
+  const SUPABASE_URL = 'https://gzlyehdjjbsvojfpkzvr.supabase.co';
+  const SUPABASE_PUBLIC_KEY = 'sb_publishable_rVA0Q76Ki3K0wxYwOV0_GA_JFmEg-vC';
+  const ADMIN_EMAIL = 'pablofreitas1204@gmail.com';
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+  const categories = [
+    {name:'WhatsApp', icon:'fa-brands fa-whatsapp', desc:'Conversas e contatos'},
+    {name:'Instagram', icon:'fa-brands fa-instagram', desc:'Perfis e publicações'},
+    {name:'Sites Web', icon:'fa-solid fa-globe', desc:'Páginas e ferramentas'},
+    {name:'Facebook', icon:'fa-brands fa-facebook-f', desc:'Páginas e perfis'},
+    {name:'Outros Links', icon:'fa-solid fa-bookmark', desc:'Outros atalhos importantes'}
+  ];
+  let currentUser = null;
+  let links = [];
+  let editingId = null;
+  const $ = id => document.getElementById(id);
+
+  function setStatus(message='', error=false){ $('status').textContent=message; $('status').classList.toggle('error',error); }
+  function safeUrl(raw){ try { const u=new URL(raw); return ['http:','https:'].includes(u.protocol) ? u.href : null; } catch { return null; } }
+  function showModal(id){ $(id).showModal(); }
+  document.querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',()=>$(btn.dataset.close).close()));
+
+  function render(){
+    const root=$('directories'); root.replaceChildren();
+    categories.forEach(cat=>{
+      const items=links.filter(link=>link.categoria===cat.name);
+      const section=document.createElement('section'); section.className='directory';
+      const head=document.createElement('div'); head.className='dirhead';
+      const icon=document.createElement('div'); icon.className='diricon'; const i=document.createElement('i'); i.className=cat.icon; icon.append(i);
+      const text=document.createElement('div'); text.className='dirtext'; const h=document.createElement('h2'); h.textContent=cat.name; const p=document.createElement('p'); p.textContent=cat.desc; text.append(h,p);
+      const count=document.createElement('span'); count.className='count'; count.textContent=items.length+' '+(items.length===1?'link':'links'); head.append(icon,text,count); section.append(head);
+      const list=document.createElement('div'); list.className='links';
+      if(!items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=currentUser?'Nenhum link aqui ainda. Clique em “Adicionar link”.':'Nenhum link cadastrado nesta categoria.';list.append(empty)}
+     
+items.forEach(link => {
+  const colors = {
+    'WhatsApp': '#25D366',
+    'Instagram': 'linear-gradient(110deg, #833AB4, #E1306C, #FCAF45)',
+    'Sites Web': '#B38B20',
+    'Facebook': '#1877F2',
+    'Outros Links': '#424242'
+  };
+
+  const row = document.createElement('div');
+  row.className = 'linkrow';
+
+  const open = document.createElement('a');
+  open.className = 'link-button';
+  open.href = link.url;
+  open.target = '_blank';
+  open.rel = 'noopener noreferrer';
+  open.style.background = colors[cat.name] || '#424242';
+  open.setAttribute('aria-label', 'Acessar ' + link.nome);
+
+  const icon = document.createElement('i');
+  icon.className = cat.icon + ' link-icon';
+
+  const label = document.createElement('span');
+  label.className = 'link-label';
+  label.textContent = link.nome;
+
+  const arrow = document.createElement('i');
+  arrow.className = 'fa-solid fa-arrow-up-right-from-square arrow';
+
+  open.append(icon, label, arrow);
+  row.append(open);
+
+  if (currentUser) {
+    const actions = document.createElement('div');
+    actions.className = 'linkactions';
+
+    const edit = document.createElement('button');
+    edit.className = 'mini';
+    edit.title = 'Editar';
+    edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+    edit.addEventListener('click', () => openEdit(link));
+
+    const del = document.createElement('button');
+    del.className = 'mini';
+    del.title = 'Excluir';
+    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    del.addEventListener('click', () => deleteLink(link));
+
+    actions.append(edit, del);
+    row.append(actions);
+  }
+
+  list.append(row);
+});
+
+      section.append(list);root.append(section);
+    });
+    $('app').classList.toggle('is-admin',!!currentUser);
+    $('adminBar').classList.toggle('show',!!currentUser);
+    $('loginBtn').classList.toggle('hide',!!currentUser);$('logoutBtn').classList.toggle('hide',!currentUser);
+    $('sessionLabel').textContent=currentUser?'Administrador conectado':'Modo visitante';
+  }
+
+  async function loadLinks(){
+    setStatus(''); $('directories').innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando seus links...</div>';
+    const {data,error}=await db.from('meus_links').select('id,categoria,nome,url,criado_em').order('criado_em',{ascending:true});
+    if(error){$('directories').innerHTML='';setStatus('Não foi possível carregar os links. Confira se executou o SQL de configuração no Supabase. Detalhe: '+error.message,true);return}
+    links=data||[];render();
+  }
+
+  $('loginBtn').addEventListener('click',()=>{ $('loginError').textContent=''; $('loginPassword').value=''; showModal('loginModal'); });
+  $('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();currentUser=null;render();setStatus('Você saiu da área administrativa.');await loadLinks()});
+  $('loginForm').addEventListener('submit',async e=>{
+    e.preventDefault();$('loginError').textContent='';$('loginSubmit').disabled=true;
+    const email=$('loginEmail').value.trim().toLowerCase();
+    if(email!==ADMIN_EMAIL){$('loginError').textContent='Este e-mail não está autorizado.';$('loginSubmit').disabled=false;return}
+    const {data,error}=await db.auth.signInWithPassword({email,password:$('loginPassword').value});
+    $('loginSubmit').disabled=false;
+    if(error){$('loginError').textContent='Não foi possível entrar. Confira e-mail e senha e se o usuário existe no Supabase Auth.';return}
+    if(data.user?.email?.toLowerCase()!==ADMIN_EMAIL){await db.auth.signOut();$('loginError').textContent='Conta não autorizada.';return}
+    currentUser=data.user;$('loginModal').close();render();setStatus('Login realizado. Você pode gerenciar os links.');await loadLinks();
+  });
+  $('addBtn').addEventListener('click',()=>{editingId=null;$('linkForm').reset();$('linkModalTitle').textContent='Adicionar link';$('linkSubmit').textContent='Salvar link';$('linkError').textContent='';showModal('linkModal')});
+  $('refreshBtn').addEventListener('click',loadLinks);
+  function openEdit(link){editingId=link.id;$('linkForm').reset();$('category').value=link.categoria;$('linkName').value=link.nome;$('linkUrl').value=link.url;$('linkModalTitle').textContent='Editar link';$('linkSubmit').textContent='Salvar alterações';$('linkError').textContent='';showModal('linkModal')}
+  $('linkForm').addEventListener('submit',async e=>{
+    e.preventDefault();if(!currentUser){$('linkError').textContent='Entre como administrador para salvar.';return}
+    const categoria=$('category').value;const nome=$('linkName').value.trim();const url=safeUrl($('linkUrl').value.trim());
+    if(!url){$('linkError').textContent='Digite uma URL válida iniciada por http:// ou https://.';return}
+    $('linkSubmit').disabled=true;$('linkError').textContent='';
+    const payload={categoria,nome,url};
+    const result=editingId===null?await db.from('meus_links').insert(payload):await db.from('meus_links').update(payload).eq('id',editingId);
+    $('linkSubmit').disabled=false;
+    if(result.error){$('linkError').textContent='Erro ao salvar. Confira as políticas RLS no Supabase. '+result.error.message;return}
+    $('linkModal').close();setStatus(editingId===null?'Link adicionado com sucesso.':'Link atualizado com sucesso.');editingId=null;await loadLinks();
+  });
+  async function deleteLink(link){if(!currentUser)return;if(!confirm('Excluir o link “'+link.nome+'”?'))return;const {error}=await db.from('meus_links').delete().eq('id',link.id);if(error){setStatus('Não foi possível excluir. Confira as políticas RLS. '+error.message,true);return}setStatus('Link excluído.');await loadLinks()}
+
+  db.auth.onAuthStateChange((_event,session)=>{
+    const user=session?.user||null;
+    if(user&&user.email?.toLowerCase()===ADMIN_EMAIL){currentUser=user}else{currentUser=null}
+    render();
+  });
+  (async()=>{const {data}=await db.auth.getSession();const user=data.session?.user||null;currentUser=user?.email?.toLowerCase()===ADMIN_EMAIL?user:null;await loadLinks()})();
+</script>
+</body>
+</html>
