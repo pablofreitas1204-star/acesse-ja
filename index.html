@@ -424,6 +424,69 @@
     .mini { padding: 7px; }
     .dirhead { padding: 14px 12px; gap: 9px; }
   }
+
+  /* ===== Camada de estilo dinâmico ===== */
+  html{scroll-behavior:smooth}
+  body{overflow-x:hidden;background:#050505}
+  .bg-fx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+    background:radial-gradient(ellipse at top,#211b0b 0%,#090909 40%,#050505 80%)}
+  .bg-fx .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:float 18s ease-in-out infinite}
+  .bg-fx .o1{width:420px;height:420px;background:#d4af37;top:-120px;left:-100px}
+  .bg-fx .o2{width:360px;height:360px;background:#8a6a12;bottom:-120px;right:-80px;animation-delay:-6s}
+  .bg-fx .o3{width:260px;height:260px;background:#f5dc83;top:40%;left:60%;opacity:.15;animation-delay:-12s}
+  .bg-fx .grid{position:absolute;inset:0;background-image:linear-gradient(#d4af3710 1px,transparent 1px),linear-gradient(90deg,#d4af3710 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,40px) scale(1.1)}66%{transform:translate(-40px,30px) scale(.95)}}
+  #spark{position:fixed;inset:0;z-index:-1;pointer-events:none}
+
+  .logo{position:relative;animation:pulse 3s ease-in-out infinite}
+  .logo::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;
+    border-top-color:var(--gold-light);border-right-color:var(--gold);animation:spin 4s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{box-shadow:0 0 25px #d4af3730}50%{box-shadow:0 0 55px #d4af3770}}
+
+  h1{background:linear-gradient(110deg,#a87912 0%,#fff3b2 25%,#d4af37 50%,#fff3b2 75%,#a87912 100%);
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;animation:shine 5s linear infinite}
+  @keyframes shine{to{background-position:200% center}}
+  .subtitle{overflow:hidden;white-space:nowrap;margin-inline:auto;width:fit-content;border-right:2px solid var(--gold);animation:type 2.4s steps(30) .3s both,caret .8s step-end infinite}
+  @keyframes type{from{width:0}}
+  @keyframes caret{50%{border-color:transparent}}
+
+  .reveal{opacity:0;transform:translateY(24px) scale(.98);animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  .directory{position:relative;backdrop-filter:blur(10px);background:linear-gradient(135deg,#15130dcc,#0d0d0dcc 65%);
+    transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;transform-style:preserve-3d}
+  .directory::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+    background:conic-gradient(from var(--a,0deg),transparent 0 70%,var(--gold-light),transparent);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+    opacity:0;transition:opacity .4s;animation:rot 4s linear infinite}
+  @property --a{syntax:"<angle>";initial-value:0deg;inherits:false}
+  @keyframes rot{to{--a:360deg}}
+  .directory:hover{border-color:var(--gold);box-shadow:0 18px 45px #000a,0 0 30px #d4af3725}
+  .directory:hover::before{opacity:1}
+  .diricon{transition:transform .4s}
+  .directory:hover .diricon{transform:rotate(-8deg) scale(1.1)}
+
+  .link-button{position:relative;overflow:hidden;isolation:isolate}
+  .link-button::after{content:"";position:absolute;top:0;left:-75%;width:50%;height:100%;
+    background:linear-gradient(100deg,transparent,#ffffff55,transparent);transform:skewX(-20deg);transition:left .6s;z-index:-1}
+  .link-button:hover::after{left:130%}
+  .link-button:hover{transform:translateY(-3px) scale(1.015)}
+  .link-button:active{transform:scale(.97)}
+  .link-button .arrow{transition:transform .3s}
+  .link-button:hover .arrow{transform:translate(3px,-3px)}
+  .link-button:hover .link-icon{animation:wiggle .5s}
+  @keyframes wiggle{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+
+  .primary{background-size:200% auto;background-image:linear-gradient(110deg,var(--gold),var(--gold-light),var(--gold));transition:background-position .5s,transform .15s,box-shadow .3s}
+  .primary:hover{background-position:right center;box-shadow:0 8px 25px #d4af3750}
+  .pill{backdrop-filter:blur(8px);background:#111a;transition:all .25s}
+  .pill:hover{border-color:var(--gold);box-shadow:0 0 18px #d4af3740}
+  .modal[open]{animation:pop .35s cubic-bezier(.2,.9,.3,1.3)}
+  @keyframes pop{from{opacity:0;transform:scale(.9) translateY(20px)}}
+  footer{animation:fade 3s ease-in-out infinite alternate}
+  @keyframes fade{from{opacity:.5}to{opacity:1;color:var(--gold)}}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
 
 </head>
@@ -598,6 +661,33 @@ items.forEach(link => {
     render();
   });
   (async()=>{const {data}=await db.auth.getSession();const user=data.session?.user||null;currentUser=user?.email?.toLowerCase()===ADMIN_EMAIL?user:null;await loadLinks()})();
+</script>
+
+<script>
+// ===== Efeitos dinâmicos =====
+(function(){
+  const fx=document.createElement('div');fx.className='bg-fx';
+  fx.innerHTML='<div class="grid"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>';
+  document.body.prepend(fx);
+  const c=document.createElement('canvas');c.id='spark';document.body.prepend(c);
+  const ctx=c.getContext('2d');let W,H,P=[];
+  const size=()=>{W=c.width=innerWidth;H=c.height=innerHeight};size();addEventListener('resize',size);
+  for(let i=0;i<55;i++)P.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.8+.4,v:Math.random()*.4+.1,o:Math.random()});
+  (function loop(){ctx.clearRect(0,0,W,H);P.forEach(p=>{p.y-=p.v;p.o+=.01;if(p.y<0){p.y=H;p.x=Math.random()*W}
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(245,220,131,'+(.3+Math.abs(Math.sin(p.o))*.5)+')';ctx.fill()});requestAnimationFrame(loop)})();
+
+  ['header','.intro'].forEach((s,i)=>{const e=document.querySelector(s);if(e){e.classList.add('reveal');e.style.animationDelay=i*.15+'s'}});
+  const root=document.getElementById('directories');
+  const animate=()=>root.querySelectorAll('.directory').forEach((d,i)=>{
+    d.classList.add('reveal');d.style.animationDelay=(.25+i*.1)+'s';
+    d.querySelectorAll('.linkrow').forEach((r,j)=>{r.classList.add('reveal');r.style.animationDelay=(.4+i*.1+j*.06)+'s'});
+    if(!d.dataset.tilt){d.dataset.tilt=1;
+      d.addEventListener('mousemove',e=>{const b=d.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;
+        d.style.transform=`perspective(900px) rotateX(${-y*5}deg) rotateY(${x*5}deg) translateY(-4px)`});
+      d.addEventListener('mouseleave',()=>d.style.transform='')}
+  });
+  new MutationObserver(animate).observe(root,{childList:true});animate();
+})();
 </script>
 </body>
 </html>
