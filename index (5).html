@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050505" />
+  <meta name="theme-color" content="#050914" />
   <title>ACESSE JÁ | Seus links em um só lugar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,15 +11,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-  :root {
-    --gold: #d4af37;
-    --gold-light: #f5dc83;
-    --black: #050505;
-    --card: #111;
-    --border: #453817;
-    --muted: #b7ad8e;
-    --danger: #ff6464;
-  }
+  
+:root {
+  --gold: #ff5500;
+  --gold-light: #ff8a3d;
+  --black: #050505;
+  --card: #111111;
+  --border: #492313;
+  --muted: #b8a49a;
+  --danger: #ff6464;
+}
 
   * { box-sizing: border-box; }
 
@@ -28,7 +29,7 @@
     min-height: 100vh;
     font-family: Montserrat, Arial, sans-serif;
     color: #fff;
-    background: radial-gradient(ellipse at top, #211b0b 0%, #090909 38%, #050505 75%);
+    background: radial-gradient(ellipse at top, #14213d 0%, #0a1222 38%, #050914 75%);
   }
 
   .wrap {
@@ -427,16 +428,17 @@
 
   /* ===== Camada de estilo dinâmico ===== */
   html{scroll-behavior:smooth}
-  body{overflow-x:hidden;background:#050505}
-  .bg-fx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
-    background:radial-gradient(ellipse at top,#211b0b 0%,#090909 40%,#050505 80%)}
+  body{overflow-x:hidden;background:#050914}
+  .bg-fx{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+    background:radial-gradient(ellipse at top,#14213d 0%,#0a1222 40%,#050914 80%)}
   .bg-fx .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:float 18s ease-in-out infinite}
   .bg-fx .o1{width:420px;height:420px;background:#d4af37;top:-120px;left:-100px}
   .bg-fx .o2{width:360px;height:360px;background:#8a6a12;bottom:-120px;right:-80px;animation-delay:-6s}
   .bg-fx .o3{width:260px;height:260px;background:#f5dc83;top:40%;left:60%;opacity:.15;animation-delay:-12s}
   .bg-fx .grid{position:absolute;inset:0;background-image:linear-gradient(#d4af3710 1px,transparent 1px),linear-gradient(90deg,#d4af3710 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
   @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,40px) scale(1.1)}66%{transform:translate(-40px,30px) scale(.95)}}
-  #spark{position:fixed;inset:0;z-index:-1;pointer-events:none}
+  #spark{position:fixed;inset:0;z-index:1;pointer-events:none}
+  #app{position:relative;z-index:2}
 
   .logo{position:relative;animation:pulse 3s ease-in-out infinite}
   .logo::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid transparent;
@@ -492,7 +494,11 @@
 </head>
 <body>
 <div class="wrap" id="app">
-  <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button></div>
+  <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button> 
+<button id="signupBtn" class="pill">
+  <i class="fa-solid fa-user-plus"></i> Criar minha conta
+</button>
+</div>
   <header>
     <div class="logo"><i class="fa-solid fa-link"></i></div>
     <h1>ACESSE JÁ</h1><div class="subtitle">NOSSO PORTFÓLIO EM UM SÓ LUGAR</div>
@@ -521,146 +527,422 @@
 </dialog>
 
 <script>
-  // Configuração pública do projeto Supabase. Nunca coloque service_role/secret key neste arquivo.
-  const SUPABASE_URL = 'https://gzlyehdjjbsvojfpkzvr.supabase.co';
-  const SUPABASE_PUBLIC_KEY = 'sb_publishable_rVA0Q76Ki3K0wxYwOV0_GA_JFmEg-vC';
-  const ADMIN_EMAIL = 'pablofreitas1204@gmail.com';
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
-  const categories = [
-    {name:'WhatsApp', icon:'fa-brands fa-whatsapp', desc:'Conversas e contatos'},
-    {name:'Instagram', icon:'fa-brands fa-instagram', desc:'Perfis e publicações'},
-    {name:'Sites Web', icon:'fa-solid fa-globe', desc:'Páginas e ferramentas'},
-    {name:'Facebook', icon:'fa-brands fa-facebook-f', desc:'Páginas e perfis'},
-    {name:'Outros Links', icon:'fa-solid fa-bookmark', desc:'Outros atalhos importantes'}
-  ];
-  let currentUser = null;
-  let links = [];
-  let editingId = null;
-  const $ = id => document.getElementById(id);
+ 
+const SUPABASE_URL = 'https://gzlyehdjjbsvojfpkzvr.supabase.co';
+const SUPABASE_PUBLIC_KEY = 'sb_publishable_rVA0Q76Ki3K0wxYwOV0_GA_JFmEg-vC';
 
-  function setStatus(message='', error=false){ $('status').textContent=message; $('status').classList.toggle('error',error); }
-  function safeUrl(raw){ try { const u=new URL(raw); return ['http:','https:'].includes(u.protocol) ? u.href : null; } catch { return null; } }
-  function showModal(id){ $(id).showModal(); }
-  document.querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',()=>$(btn.dataset.close).close()));
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
-  function render(){
-    const root=$('directories'); root.replaceChildren();
-    categories.forEach(cat=>{
-      const items=links.filter(link=>link.categoria===cat.name);
-      const section=document.createElement('section'); section.className='directory';
-      const head=document.createElement('div'); head.className='dirhead';
-      const icon=document.createElement('div'); icon.className='diricon'; const i=document.createElement('i'); i.className=cat.icon; icon.append(i);
-      const text=document.createElement('div'); text.className='dirtext'; const h=document.createElement('h2'); h.textContent=cat.name; const p=document.createElement('p'); p.textContent=cat.desc; text.append(h,p);
-      const count=document.createElement('span'); count.className='count'; count.textContent=items.length+' '+(items.length===1?'link':'links'); head.append(icon,text,count); section.append(head);
-      const list=document.createElement('div'); list.className='links';
-      if(!items.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=currentUser?'Nenhum link aqui ainda. Clique em “Adicionar link”.':'Nenhum link cadastrado nesta categoria.';list.append(empty)}
-     
-items.forEach(link => {
-  const colors = {
-    'WhatsApp': '#25D366',
-    'Instagram': 'linear-gradient(110deg, #833AB4, #E1306C, #FCAF45)',
-    'Sites Web': '#B38B20',
-    'Facebook': '#1877F2',
-    'Outros Links': '#424242'
-  };
+const categories = [
+  { name: 'WhatsApp', icon: 'fa-brands fa-whatsapp', desc: 'Conversas e contatos' },
+  { name: 'Instagram', icon: 'fa-brands fa-instagram', desc: 'Perfis e publicações' },
+  { name: 'Sites Web', icon: 'fa-solid fa-globe', desc: 'Páginas e ferramentas' },
+  { name: 'Facebook', icon: 'fa-brands fa-facebook-f', desc: 'Páginas e perfis' },
+  { name: 'Outros Links', icon: 'fa-solid fa-bookmark', desc: 'Outros atalhos importantes' }
+];
 
-  const row = document.createElement('div');
-  row.className = 'linkrow';
+let currentUser = null;
+let currentCompany = null;
+let ownedCompany = null;
+let links = [];
+let editingId = null;
 
-  const open = document.createElement('a');
-  open.className = 'link-button';
-  open.href = link.url;
-  open.target = '_blank';
-  open.rel = 'noopener noreferrer';
-  open.style.background = colors[cat.name] || '#424242';
-  open.setAttribute('aria-label', 'Acessar ' + link.nome);
+const $ = id => document.getElementById(id);
 
-  const icon = document.createElement('i');
-  icon.className = cat.icon + ' link-icon';
+// Cada empresa usa um endereço como:
+// seu-site/?empresa=acesse-ja
+// seu-site/?empresa=brothers
+const params = new URLSearchParams(window.location.search);
+const companySlug = (params.get('empresa') || 'acesse-ja').trim();
 
-  const label = document.createElement('span');
-  label.className = 'link-label';
-  label.textContent = link.nome;
+function setStatus(message = '', error = false) {
+  $('status').textContent = message;
+  $('status').classList.toggle('error', error);
+}
 
-  const arrow = document.createElement('i');
-  arrow.className = 'fa-solid fa-arrow-up-right-from-square arrow';
-
-  open.append(icon, label, arrow);
-  row.append(open);
-
-  if (currentUser) {
-    const actions = document.createElement('div');
-    actions.className = 'linkactions';
-
-    const edit = document.createElement('button');
-    edit.className = 'mini';
-    edit.title = 'Editar';
-    edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
-    edit.addEventListener('click', () => openEdit(link));
-
-    const del = document.createElement('button');
-    del.className = 'mini';
-    del.title = 'Excluir';
-    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    del.addEventListener('click', () => deleteLink(link));
-
-    actions.append(edit, del);
-    row.append(actions);
+function safeUrl(raw) {
+  try {
+    const u = new URL(raw);
+    return ['http:', 'https:'].includes(u.protocol) ? u.href : null;
+  } catch {
+    return null;
   }
+}
 
-  list.append(row);
+function showModal(id) {
+  $(id).showModal();
+}
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => $(btn.dataset.close).close());
 });
 
-      section.append(list);root.append(section);
-    });
-    $('app').classList.toggle('is-admin',!!currentUser);
-    $('adminBar').classList.toggle('show',!!currentUser);
-    $('loginBtn').classList.toggle('hide',!!currentUser);$('logoutBtn').classList.toggle('hide',!currentUser);
-    $('sessionLabel').textContent=currentUser?'Administrador conectado':'Modo visitante';
+// Busca somente os dados públicos da empresa pelo slug.
+async function loadCompany() {
+  const { data, error } = await db.rpc('buscar_empresa_publica', {
+    p_slug: companySlug
+  });
+
+  if (error) throw error;
+
+  currentCompany = Array.isArray(data) ? data[0] : data;
+
+  if (!currentCompany) {
+    throw new Error('Empresa não encontrada ou desativada.');
   }
 
-  async function loadLinks(){
-    setStatus(''); $('directories').innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando seus links...</div>';
-    const {data,error}=await db.from('meus_links').select('id,categoria,nome,url,criado_em').order('criado_em',{ascending:true});
-    if(error){$('directories').innerHTML='';setStatus('Não foi possível carregar os links. Confira se executou o SQL de configuração no Supabase. Detalhe: '+error.message,true);return}
-    links=data||[];render();
-  }
+  $('app').querySelector('h1').textContent = currentCompany.nome;
+  document.title = currentCompany.nome + ' | Acesse seus links';
+}
 
-  $('loginBtn').addEventListener('click',()=>{ $('loginError').textContent=''; $('loginPassword').value=''; showModal('loginModal'); });
-  $('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();currentUser=null;render();setStatus('Você saiu da área administrativa.');await loadLinks()});
-  $('loginForm').addEventListener('submit',async e=>{
-    e.preventDefault();$('loginError').textContent='';$('loginSubmit').disabled=true;
-    const email=$('loginEmail').value.trim().toLowerCase();
-    if(email!==ADMIN_EMAIL){$('loginError').textContent='Este e-mail não está autorizado.';$('loginSubmit').disabled=false;return}
-    const {data,error}=await db.auth.signInWithPassword({email,password:$('loginPassword').value});
-    $('loginSubmit').disabled=false;
-    if(error){$('loginError').textContent='Não foi possível entrar. Confira e-mail e senha e se o usuário existe no Supabase Auth.';return}
-    if(data.user?.email?.toLowerCase()!==ADMIN_EMAIL){await db.auth.signOut();$('loginError').textContent='Conta não autorizada.';return}
-    currentUser=data.user;$('loginModal').close();render();setStatus('Login realizado. Você pode gerenciar os links.');await loadLinks();
-  });
-  $('addBtn').addEventListener('click',()=>{editingId=null;$('linkForm').reset();$('linkModalTitle').textContent='Adicionar link';$('linkSubmit').textContent='Salvar link';$('linkError').textContent='';showModal('linkModal')});
-  $('refreshBtn').addEventListener('click',loadLinks);
-  function openEdit(link){editingId=link.id;$('linkForm').reset();$('category').value=link.categoria;$('linkName').value=link.nome;$('linkUrl').value=link.url;$('linkModalTitle').textContent='Editar link';$('linkSubmit').textContent='Salvar alterações';$('linkError').textContent='';showModal('linkModal')}
-  $('linkForm').addEventListener('submit',async e=>{
-    e.preventDefault();if(!currentUser){$('linkError').textContent='Entre como administrador para salvar.';return}
-    const categoria=$('category').value;const nome=$('linkName').value.trim();const url=safeUrl($('linkUrl').value.trim());
-    if(!url){$('linkError').textContent='Digite uma URL válida iniciada por http:// ou https://.';return}
-    $('linkSubmit').disabled=true;$('linkError').textContent='';
-    const payload={categoria,nome,url};
-    const result=editingId===null?await db.from('meus_links').insert(payload):await db.from('meus_links').update(payload).eq('id',editingId);
-    $('linkSubmit').disabled=false;
-    if(result.error){$('linkError').textContent='Erro ao salvar. Confira as políticas RLS no Supabase. '+result.error.message;return}
-    $('linkModal').close();setStatus(editingId===null?'Link adicionado com sucesso.':'Link atualizado com sucesso.');editingId=null;await loadLinks();
-  });
-  async function deleteLink(link){if(!currentUser)return;if(!confirm('Excluir o link “'+link.nome+'”?'))return;const {error}=await db.from('meus_links').delete().eq('id',link.id);if(error){setStatus('Não foi possível excluir. Confira as políticas RLS. '+error.message,true);return}setStatus('Link excluído.');await loadLinks()}
+// Verifica se a conta conectada é proprietária desta empresa.
+async function checkOwner(user) {
+  currentUser = null;
+  ownedCompany = null;
 
-  db.auth.onAuthStateChange((_event,session)=>{
-    const user=session?.user||null;
-    if(user&&user.email?.toLowerCase()===ADMIN_EMAIL){currentUser=user}else{currentUser=null}
+  if (!user) {
     render();
+    return;
+  }
+
+  const { data, error } = await db
+    .from('empresas')
+    .select('id,nome,slug,owner_user_id')
+    .eq('owner_user_id', user.id)
+    .eq('ativa', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao verificar proprietário:', error.message);
+    render();
+    return;
+  }
+
+  ownedCompany = data || null;
+
+  // Só permite administrar a empresa correspondente a esta página.
+  if (ownedCompany && ownedCompany.id === currentCompany?.id) {
+    currentUser = user;
+  }
+
+  render();
+}
+
+function render() {
+  const root = $('directories');
+  root.replaceChildren();
+
+  categories.forEach(cat => {
+    const items = links.filter(link => link.categoria === cat.name);
+
+    const section = document.createElement('section');
+    section.className = 'directory';
+
+    const head = document.createElement('div');
+    head.className = 'dirhead';
+
+    const dirIcon = document.createElement('div');
+    dirIcon.className = 'diricon';
+
+    const icon = document.createElement('i');
+    icon.className = cat.icon;
+    dirIcon.append(icon);
+
+    const dirText = document.createElement('div');
+    dirText.className = 'dirtext';
+
+    const title = document.createElement('h2');
+    title.textContent = cat.name;
+
+    const desc = document.createElement('p');
+    desc.textContent = cat.desc;
+
+    dirText.append(title, desc);
+
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `${items.length} ${items.length === 1 ? 'link' : 'links'}`;
+
+    head.append(dirIcon, dirText, count);
+    section.append(head);
+
+    const list = document.createElement('div');
+    list.className = 'links';
+
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = currentUser
+        ? 'Nenhum link aqui ainda. Clique em “Adicionar link”.'
+        : 'Nenhum link cadastrado nesta categoria.';
+      list.append(empty);
+    }
+
+    items.forEach(link => {
+      const row = document.createElement('div');
+      row.className = 'linkrow';
+
+      const open = document.createElement('a');
+      open.className = 'link-button';
+      open.href = link.url;
+      open.target = '_blank';
+      open.rel = 'noopener noreferrer';
+      open.setAttribute('aria-label', 'Acessar ' + link.nome);
+
+      const colors = {
+        'WhatsApp': '#25D366',
+        'Instagram': 'linear-gradient(110deg,#833AB4,#E1306C,#FCAF45)',
+        'Sites Web': '#ff5500',
+        'Facebook': '#1877F2',
+        'Outros Links': '#424242'
+      };
+
+      open.style.background = colors[cat.name] || '#424242';
+
+      const linkIcon = document.createElement('i');
+      linkIcon.className = cat.icon + ' link-icon';
+
+      const label = document.createElement('span');
+      label.className = 'link-label';
+      label.textContent = link.nome;
+
+      const arrow = document.createElement('i');
+      arrow.className = 'fa-solid fa-arrow-up-right-from-square arrow';
+
+      open.append(linkIcon, label, arrow);
+      row.append(open);
+
+      if (currentUser) {
+        const actions = document.createElement('div');
+        actions.className = 'linkactions';
+
+        const edit = document.createElement('button');
+        edit.className = 'mini';
+        edit.type = 'button';
+        edit.title = 'Editar';
+        edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+        edit.addEventListener('click', () => openEdit(link));
+
+        const del = document.createElement('button');
+        del.className = 'mini';
+        del.type = 'button';
+        del.title = 'Excluir';
+        del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        del.addEventListener('click', () => deleteLink(link));
+
+        actions.append(edit, del);
+        row.append(actions);
+      }
+
+      list.append(row);
+    });
+
+    section.append(list);
+    root.append(section);
   });
-  (async()=>{const {data}=await db.auth.getSession();const user=data.session?.user||null;currentUser=user?.email?.toLowerCase()===ADMIN_EMAIL?user:null;await loadLinks()})();
+
+  $('app').classList.toggle('is-admin', !!currentUser);
+  $('adminBar').classList.toggle('show', !!currentUser);
+  $('loginBtn').classList.toggle('hide', !!currentUser);
+  $('logoutBtn').classList.toggle('hide', !currentUser);
+
+  $('sessionLabel').textContent = currentUser
+    ? 'Proprietário conectado'
+    : 'Modo visitante';
+}
+
+async function loadLinks() {
+  if (!currentCompany) return;
+
+  setStatus('');
+  $('directories').innerHTML =
+    '<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando links...</div>';
+
+  const { data, error } = await db
+    .from('meus_links')
+    .select('id,empresa_id,categoria,nome,url,criado_em')
+    .eq('empresa_id', currentCompany.id)
+    .order('criado_em', { ascending: true });
+
+  if (error) {
+    $('directories').replaceChildren();
+    setStatus('Erro ao carregar os links: ' + error.message, true);
+    return;
+  }
+
+  links = data || [];
+  render();
+}
+
+$('loginBtn').addEventListener('click', () => {
+  $('loginError').textContent = '';
+  $('loginPassword').value = '';
+  showModal('loginModal');
+});
+
+$('logoutBtn').addEventListener('click', async () => {
+  await db.auth.signOut();
+  currentUser = null;
+  ownedCompany = null;
+  render();
+  setStatus('Você saiu da área administrativa.');
+  await loadLinks();
+});
+
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  $('loginError').textContent = '';
+  $('loginSubmit').disabled = true;
+
+  const email = $('loginEmail').value.trim().toLowerCase();
+  const password = $('loginPassword').value;
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  $('loginSubmit').disabled = false;
+
+  if (error) {
+    $('loginError').textContent =
+      'Não foi possível entrar. Confira o e-mail e a senha.';
+    return;
+  }
+
+  await checkOwner(data.user);
+
+  if (!currentUser) {
+    await db.auth.signOut();
+    $('loginError').textContent =
+      'Esta conta não é proprietária desta empresa.';
+    return;
+  }
+
+  $('loginModal').close();
+  setStatus('Login realizado. Você pode gerenciar os links.');
+  await loadLinks();
+});
+
+$('addBtn').addEventListener('click', () => {
+  editingId = null;
+  $('linkForm').reset();
+  $('linkModalTitle').textContent = 'Adicionar link';
+  $('linkSubmit').textContent = 'Salvar link';
+  $('linkError').textContent = '';
+  showModal('linkModal');
+});
+
+$('refreshBtn').addEventListener('click', loadLinks);
+
+function openEdit(link) {
+  editingId = link.id;
+  $('linkForm').reset();
+  $('category').value = link.categoria;
+  $('linkName').value = link.nome;
+  $('linkUrl').value = link.url;
+  $('linkModalTitle').textContent = 'Editar link';
+  $('linkSubmit').textContent = 'Salvar alterações';
+  $('linkError').textContent = '';
+  showModal('linkModal');
+}
+
+$('linkForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  if (!currentUser || !currentCompany) {
+    $('linkError').textContent = 'Entre com a conta proprietária da empresa.';
+    return;
+  }
+
+  const categoria = $('category').value;
+  const nome = $('linkName').value.trim();
+  const url = safeUrl($('linkUrl').value.trim());
+
+  if (!url) {
+    $('linkError').textContent = 'Digite uma URL válida iniciada por http:// ou https://.';
+    return;
+  }
+
+  $('linkSubmit').disabled = true;
+  $('linkError').textContent = '';
+
+  // O vínculo é definido pelo sistema, não pelo formulário.
+  const payload = {
+    empresa_id: currentCompany.id,
+    categoria,
+    nome,
+    url
+  };
+
+  const result = editingId === null
+    ? await db.from('meus_links').insert(payload)
+    : await db.from('meus_links')
+        .update({ categoria, nome, url })
+        .eq('id', editingId)
+        .eq('empresa_id', currentCompany.id);
+
+  $('linkSubmit').disabled = false;
+
+  if (result.error) {
+    $('linkError').textContent = 'Erro ao salvar: ' + result.error.message;
+    return;
+  }
+
+  $('linkModal').close();
+  setStatus(editingId === null ? 'Link adicionado com sucesso.' : 'Link atualizado com sucesso.');
+  editingId = null;
+  await loadLinks();
+});
+
+async function deleteLink(link) {
+  if (!currentUser || !currentCompany) return;
+
+  if (!confirm('Excluir o link "' + link.nome + '"?')) return;
+
+  const { error } = await db
+    .from('meus_links')
+    .delete()
+    .eq('id', link.id)
+    .eq('empresa_id', currentCompany.id);
+
+  if (error) {
+    setStatus('Não foi possível excluir: ' + error.message, true);
+    return;
+  }
+
+  setStatus('Link excluído.');
+  await loadLinks();
+}
+
+(async function init() {
+  try {
+    await loadCompany();
+
+    const { data } = await db.auth.getSession();
+    await checkOwner(data.session?.user || null);
+    await loadLinks();
+
+    db.auth.onAuthStateChange((_event, session) => {
+      // Evita operações Supabase dentro do callback de autenticação.
+      setTimeout(async () => {
+        await checkOwner(session?.user || null);
+        await loadLinks();
+      }, 0);
+    });
+  } catch (error) {
+    console.error(error);
+    $('directories').replaceChildren();
+    setStatus(
+      'Não foi possível abrir esta empresa. Confira o endereço e a função pública no Supabase.',
+      true
+    );
+  }
+})();
+
 </script>
 
 <script>
