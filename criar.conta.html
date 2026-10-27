@@ -1,0 +1,315 @@
+# Criar minha conta — ACESSE JÁ
+
+Crie um arquivo chamado `criar-conta.html` e cole o código abaixo. Ele utiliza o Supabase para cadastrar o usuário.
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar minha conta | ACESSE JÁ</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at top, #30240c 0, transparent 40%),
+        #0b0b0b;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      padding: 35px;
+      border: 1px solid #51401b;
+      border-radius: 22px;
+      background: #141414;
+      box-shadow: 0 20px 70px #0009;
+    }
+
+    .logo {
+      text-align: center;
+      color: #e5bd55;
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 8px;
+      color: #e8d49b;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #373737;
+      border-radius: 10px;
+      outline: none;
+      background: #202020;
+      color: white;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #d4af37;
+      box-shadow: 0 0 0 2px #d4af3720;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f5dc83, #c59a27);
+      color: #17130a;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #mensagem {
+      display: none;
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 9px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .rodape {
+      margin-top: 24px;
+      text-align: center;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    a {
+      color: #e5bd55;
+      text-decoration: none;
+    }
+
+    .termos {
+      margin-top: 15px;
+      color: #888;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <div class="logo">ACESSE JÁ</div>
+
+    <p class="subtitle">
+      Crie sua conta e comece a organizar os links
+      da sua empresa em um só lugar.
+    </p>
+
+    <form id="formCadastro">
+      <label for="nomeEmpresa">Nome da empresa</label>
+      <input
+        id="nomeEmpresa"
+        name="nomeEmpresa"
+        type="text"
+        placeholder="Ex.: Minha Empresa"
+        required
+        maxlength="80"
+      >
+
+      <label for="email">E-mail</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="voce@email.com"
+        autocomplete="email"
+        required
+      >
+
+      <label for="senha">Senha</label>
+      <input
+        id="senha"
+        name="senha"
+        type="password"
+        placeholder="Mínimo de 8 caracteres"
+        autocomplete="new-password"
+        minlength="8"
+        required
+      >
+
+      <label for="confirmarSenha">Confirmar senha</label>
+      <input
+        id="confirmarSenha"
+        name="confirmarSenha"
+        type="password"
+        placeholder="Digite a senha novamente"
+        autocomplete="new-password"
+        minlength="8"
+        required
+      >
+
+      <button id="btnCadastro" type="submit">
+        CRIAR MINHA CONTA
+      </button>
+
+      <div id="mensagem" role="status" aria-live="polite"></div>
+    </form>
+
+    <p class="termos">
+      Ao criar sua conta, você concorda em utilizar a plataforma
+      conforme seus termos de uso e política de privacidade.
+    </p>
+
+    <p class="rodape">
+      Já possui uma conta?
+      <a href="login.html">Fazer login</a>
+    </p>
+  </main>
+
+  <script>
+    // Configuração do seu projeto Supabase
+    const SUPABASE_URL =
+      "https://gzlyehdjjbsvojfpkzvr.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_rVA0Q76Ki3K0wxYwOV0_GA_JFmEg-vC";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const form = document.getElementById("formCadastro");
+    const botao = document.getElementById("btnCadastro");
+    const mensagem = document.getElementById("mensagem");
+
+    function mostrarMensagem(texto, sucesso = false) {
+      mensagem.style.display = "block";
+      mensagem.style.background = sucesso ? "#123522" : "#401b1b";
+      mensagem.style.color = sucesso ? "#a7f3c0" : "#ffb4b4";
+      mensagem.textContent = texto;
+    }
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      const nomeEmpresa =
+        document.getElementById("nomeEmpresa").value.trim();
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const senha =
+        document.getElementById("senha").value;
+
+      const confirmarSenha =
+        document.getElementById("confirmarSenha").value;
+
+      if (!nomeEmpresa) {
+        mostrarMensagem("Informe o nome da empresa.");
+        return;
+      }
+
+      if (senha.length < 8) {
+        mostrarMensagem("A senha deve ter pelo menos 8 caracteres.");
+        return;
+      }
+
+      if (senha !== confirmarSenha) {
+        mostrarMensagem("As senhas não são iguais.");
+        return;
+      }
+
+      botao.disabled = true;
+      botao.textContent = "CRIANDO CONTA...";
+
+      try {
+        const { data, error } =
+          await supabaseClient.auth.signUp({
+            email,
+            password: senha,
+            options: {
+              data: {
+                nome_empresa: nomeEmpresa
+              },
+              emailRedirectTo: window.location.origin
+            }
+          });
+
+        if (error) throw error;
+
+        if (data.user && !data.session) {
+          mostrarMensagem(
+            "Cadastro recebido! Confira seu e-mail para confirmar a conta. " +
+            "A empresa será criada automaticamente somente se o gatilho " +
+            "de cadastro estiver configurado no Supabase.",
+            true
+          );
+        } else if (data.user) {
+          mostrarMensagem(
+            "Conta criada! A criação da empresa e do período de teste " +
+            "depende da configuração do banco.",
+            true
+          );
+        } else {
+          mostrarMensagem("Não foi possível confirmar o cadastro.");
+        }
+
+        form.reset();
+
+      } catch (erro) {
+        mostrarMensagem(
+          erro.message || "Não foi possível criar a conta."
+        );
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "CRIAR MINHA CONTA";
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+## Atenção antes de publicar
+
+- O link `login.html` precisa apontar para a página de login que você realmente utiliza.
+- No Supabase, confira **Authentication → URL Configuration** e configure a URL do seu site para a confirmação do e-mail.
+- A tela cadastra o usuário, mas não garante sozinha a criação da empresa, o teste de 7 dias ou a assinatura mensal. Isso precisa ser validado no banco e nas funções do Supabase.
+- Nunca coloque `service_role`, `SUPABASE_SERVICE_ROLE_KEY`, `MP_ACCESS_TOKEN` ou outros segredos nesse HTML. A chave pública `sb_publishable_...` é apropriada para o cliente, desde que as políticas RLS estejam configuradas corretamente.
