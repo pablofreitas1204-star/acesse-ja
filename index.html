@@ -495,9 +495,17 @@
 <body>
 <div class="wrap" id="app">
   <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button> 
-<button id="signupBtn" class="pill">
+
+<button id="signupBtn" class="pill" type="button">
   <i class="fa-solid fa-user-plus"></i> Criar minha conta
 </button>
+
+<script>
+  document.getElementById("signupBtn").addEventListener("click", () => {
+    window.location.href = "criar-conta.html";
+  });
+</script>
+
 </div>
   <header>
     <div class="logo"><i class="fa-solid fa-link"></i></div>
@@ -941,7 +949,33 @@ async function deleteLink(link) {
       true
     );
   }
-})();
+})(); 
+
+async function assinarAcesseJa() {
+  const { data: { session } } = await db.auth.getSession();
+
+  if (!session) {
+    alert("Entre na sua conta antes de assinar.");
+    return;
+  }
+
+  const { data, error } = await db.functions.invoke(
+    "criar-assinatura",
+    {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`
+      }
+    }
+  );
+
+  if (error || !data?.checkout_url) {
+    alert(data?.error || "Não foi possível abrir o pagamento.");
+    return;
+  }
+
+  window.location.href = data.checkout_url;
+}
+
 
 </script>
 
