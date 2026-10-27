@@ -495,7 +495,15 @@
 <body>
 <div class="wrap" id="app">
   <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button> 
-
+<button
+  id="alterarNomeEmpresaBtn"
+  class="pill"
+  type="button"
+  onclick="alterarNomeEmpresa()"
+>
+  <i class="fa-solid fa-pen-to-square"></i>
+  Alterar nome da empresa
+</button>
 <button id="signupBtn" class="pill" type="button">
   <i class="fa-solid fa-user-plus"></i> Criar minha conta
 </button>
@@ -512,7 +520,19 @@
     <h1>ACESSE JÁ</h1><div class="subtitle">NOSSO PORTFÓLIO EM UM SÓ LUGAR</div>
   </header>
   <p class="intro">Acesse rapidamente os links e desfrute de todas nossas funcionalidades.</p>
-  <div id="adminBar" class="adminbar"><button id="addBtn" class="primary"><i class="fa-solid fa-plus"></i> Adicionar link</button><button id="refreshBtn" class="secondary"><i class="fa-solid fa-rotate"></i> Atualizar lista</button></div>
+  <div id="adminBar" class="adminbar">
+  <button id="addBtn" class="primary" type="button">
+    <i class="fa-solid fa-plus"></i>
+    Adicionar link
+  </button>
+
+  <button id="refreshBtn" class="secondary" type="button">
+    <i class="fa-solid fa-rotate"></i>
+    Atualizar lista
+  </button>
+
+  
+</div>
   <div id="status" class="status" role="status" aria-live="polite"></div>
   <main id="directories" class="directories"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Carregando seus links...</div></main>
   <footer>ORGANIZAÇÃO &nbsp;•&nbsp; PRATICIDADE &nbsp;•&nbsp; ESTILO</footer>
@@ -568,7 +588,73 @@ function setStatus(message = '', error = false) {
   $('status').textContent = message;
   $('status').classList.toggle('error', error);
 }
+async function alterarNomeEmpresa() {
+  if (!currentUser || !currentCompany) {
+    alert("Faça login como administrador primeiro.");
+    return;
+  }
 
+  const novoNome = prompt(
+    "Digite o novo nome da empresa:",
+    currentCompany.nome || ""
+  );
+
+  if (novoNome === null) return;
+
+  const nome = novoNome.trim();
+
+  if (!nome) {
+    alert("Digite um nome válido.");
+    return;
+  }
+
+  if (nome.length > 100) {
+    alert("O nome deve ter no máximo 100 caracteres.");
+    return;
+  }
+
+  const { data, error } = await db
+    .from("empresas")
+    .update({ nome })
+    .eq("id", currentCompany.id)
+    .eq("owner_user_id", currentUser.id)
+    .select("id,nome,slug")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Erro ao alterar empresa:", error);
+    alert("Não foi possível alterar o nome. Verifique as permissões RLS.");
+    return;
+  }
+
+  if (!data) {
+    alert("Nenhuma empresa foi atualizada. Verifique as permissões no Supabase.");
+    return;
+  }
+
+  currentCompany = { ...currentCompany, ...data };
+
+  // Atualiza o nome sem depender de uma nova consulta
+  const titulo = document.querySelector("#companyName");
+  if (titulo) titulo.textContent = data.nome;
+
+  document.title = `${data.nome} | ACESSE JÁ`;
+
+  // Atualiza outros elementos, caso existam
+  const nomeEmpresa = document.querySelectorAll("[data-company-name]");
+  nomeEmpresa.forEach(el => {
+    el.textContent = data.nome;
+  });
+
+  alert("Nome da empresa alterado com sucesso!");
+}
+$('alterarNomeEmpresaBtn').addEventListener(
+  'click',
+  alterarNomeEmpresa
+);
+
+$('alterarNomeEmpresaBtn')
+  .addEventListener('click', alterarNomeEmpresa);
 function safeUrl(raw) {
   try {
     const u = new URL(raw);
@@ -639,6 +725,13 @@ async function checkOwner(user) {
 }
 
 function render() {
+
+  const btnAlterarNome = $('alterarNomeEmpresaBtn');
+
+if (btnAlterarNome) {
+  btnAlterarNome.style.display =
+    currentUser && currentCompany ? 'inline-flex' : 'none';
+}
   const root = $('directories');
   root.replaceChildren();
 
@@ -1060,4 +1153,9 @@ async function assinarAcesseJa() {
 })();
 </script>
 </body>
+
+<button id="alterarNomeEmpresaBtn" class="pill" type="button" style="display:none">
+  <i class="fa-solid fa-pen-to-square"></i>
+  Alterar nome da empresa
+</button>
 </html>
