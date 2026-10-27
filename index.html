@@ -496,9 +496,16 @@
 <div class="wrap" id="app">
   <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button> 
 
-<button id="signupBtn" class="pill" type="button">
+
+<button
+  id="signupBtn"
+  class="pill"
+  type="button"
+  onclick="window.location.href='./criar.conta.html'"
+>
   <i class="fa-solid fa-user-plus"></i> Criar minha conta
 </button>
+
 
 <script>
   document.getElementById("signupBtn").addEventListener("click", () => {
