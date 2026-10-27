@@ -1,8 +1,4 @@
-# Criar minha conta — ACESSE JÁ
 
-Crie um arquivo chamado `criar-conta.html` e cole o código abaixo. Ele utiliza o Supabase para cadastrar o usuário.
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -305,11 +301,3 @@ Crie um arquivo chamado `criar-conta.html` e cole o código abaixo. Ele utiliza 
   </script>
 </body>
 </html>
-```
-
-## Atenção antes de publicar
-
-- O link `login.html` precisa apontar para a página de login que você realmente utiliza.
-- No Supabase, confira **Authentication → URL Configuration** e configure a URL do seu site para a confirmação do e-mail.
-- A tela cadastra o usuário, mas não garante sozinha a criação da empresa, o teste de 7 dias ou a assinatura mensal. Isso precisa ser validado no banco e nas funções do Supabase.
-- Nunca coloque `service_role`, `SUPABASE_SERVICE_ROLE_KEY`, `MP_ACCESS_TOKEN` ou outros segredos nesse HTML. A chave pública `sb_publishable_...` é apropriada para o cliente, desde que as políticas RLS estejam configuradas corretamente.
