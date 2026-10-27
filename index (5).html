@@ -496,16 +496,9 @@
 <div class="wrap" id="app">
   <div class="top"><span id="sessionLabel" class="hint">Modo visitante</span><button id="loginBtn" class="pill"><i class="fa-solid fa-lock"></i> Área do administrador</button><button id="logoutBtn" class="pill hide">Sair</button> 
 
-
-<button
-  id="signupBtn"
-  class="pill"
-  type="button"
-  onclick="window.location.href='./criar.conta.html'"
->
+<button id="signupBtn" class="pill" type="button">
   <i class="fa-solid fa-user-plus"></i> Criar minha conta
 </button>
-
 
 <script>
   document.getElementById("signupBtn").addEventListener("click", () => {
@@ -806,6 +799,7 @@ $('logoutBtn').addEventListener('click', async () => {
   await loadLinks();
 });
 
+
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -815,32 +809,60 @@ $('loginForm').addEventListener('submit', async e => {
   const email = $('loginEmail').value.trim().toLowerCase();
   const password = $('loginPassword').value;
 
-  const { data, error } = await db.auth.signInWithPassword({
-    email,
-    password
-  });
+  try {
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  $('loginSubmit').disabled = false;
+    if (error) throw error;
 
-  if (error) {
+    // Busca a empresa pertencente ao usuário conectado.
+    const { data: empresa, error: empresaError } = await db
+      .from('empresas')
+      .select('id,nome,slug,owner_user_id,ativa')
+      .eq('owner_user_id', data.user.id)
+      .eq('ativa', true)
+      .limit(1)
+      .maybeSingle();
+
+    if (empresaError) throw empresaError;
+
+    if (!empresa) {
+      throw new Error(
+        'Nenhuma empresa foi encontrada para esta conta.'
+      );
+    }
+
+    // Se estiver na página inicial ou em outra empresa,
+    // abre o endereço da empresa do usuário.
+    if (empresa.slug !== companySlug) {
+      window.location.href =
+        window.location.pathname +
+        '?empresa=' + encodeURIComponent(empresa.slug);
+      return;
+    }
+
+    await checkOwner(data.user);
+
+    if (!currentUser) {
+      throw new Error(
+        'Não foi possível confirmar a propriedade da empresa.'
+      );
+    }
+
+    $('loginModal').close();
+    setStatus('Login realizado. Você pode gerenciar seus links.');
+    await loadLinks();
+
+  } catch (error) {
     $('loginError').textContent =
-      'Não foi possível entrar. Confira o e-mail e a senha.';
-    return;
+      error.message || 'Não foi possível entrar.';
+  } finally {
+    $('loginSubmit').disabled = false;
   }
-
-  await checkOwner(data.user);
-
-  if (!currentUser) {
-    await db.auth.signOut();
-    $('loginError').textContent =
-      'Esta conta não é proprietária desta empresa.';
-    return;
-  }
-
-  $('loginModal').close();
-  setStatus('Login realizado. Você pode gerenciar os links.');
-  await loadLinks();
 });
+
 
 $('addBtn').addEventListener('click', () => {
   editingId = null;
@@ -933,30 +955,55 @@ async function deleteLink(link) {
   await loadLinks();
 }
 
+
 (async function init() {
   try {
-    await loadCompany();
+    const { data: sessionData } = await db.auth.getSession();
+    const user = sessionData.session?.user;
 
-    const { data } = await db.auth.getSession();
-    await checkOwner(data.session?.user || null);
+    // Ao abrir a página inicial já conectado,
+    // encaminha o cliente à sua própria empresa.
+    if (user && companySlug === 'acesse-ja') {
+      const { data: empresa, error } = await db
+        .from('empresas')
+        .select('slug')
+        .eq('owner_user_id', user.id)
+        .eq('ativa', true)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (empresa && empresa.slug !== companySlug) {
+        window.location.replace(
+          window.location.pathname +
+          '?empresa=' + encodeURIComponent(empresa.slug)
+        );
+        return;
+      }
+    }
+
+    await loadCompany();
+    await checkOwner(user || null);
     await loadLinks();
 
     db.auth.onAuthStateChange((_event, session) => {
-      // Evita operações Supabase dentro do callback de autenticação.
       setTimeout(async () => {
         await checkOwner(session?.user || null);
         await loadLinks();
       }, 0);
     });
+
   } catch (error) {
     console.error(error);
     $('directories').replaceChildren();
     setStatus(
-      'Não foi possível abrir esta empresa. Confira o endereço e a função pública no Supabase.',
+      'Não foi possível abrir a empresa. Verifique o acesso ao Supabase.',
       true
     );
   }
-})(); 
+})();
+
 
 async function assinarAcesseJa() {
   const { data: { session } } = await db.auth.getSession();
